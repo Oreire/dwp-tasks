@@ -1,0 +1,43 @@
+# groups:
+#   - name: example-alerts
+#     rules:
+#       - alert: HighCPUUsage
+#         expr: node_load1 > 1
+#         for: 5m
+#         labels:
+#           severity: warning
+#         annotations:
+#           summary: "High CPU load detected"
+#           description: "The 1-minute load average is above 1."
+
+groups:
+  - name: system-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU utilisation detected"
+          description: "CPU utilisation has been above 80% for more than 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: ((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes)
+              / node_memory_MemTotal_bytes) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory utilisation detected"
+          description: "Memory utilisation has exceeded 80% for more than 5 minutes."
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"})
+              / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} * 100 > 80  
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk utilisation detected" 
+          description: "Disk utilisation has exceeded 80% for more than 5 minutes."

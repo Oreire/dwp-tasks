@@ -145,3 +145,25 @@ This unified three‑tier AWS architecture integrates:
 Together, these components deliver a resilient, secure, compliant, and highly available environment for modern applications.
 
  
+grafana:
+  image: grafana/grafana:10.2.0
+  container_name: grafana
+  restart: unless-stopped
+  ports:
+    - "3000:3000"
+  environment:
+    - GF_SECURITY_ADMIN_USER=admin
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  volumes:
+    - grafana_data:/var/lib/grafana
+    - ./grafana-provisioning:/etc/grafana/provisioning
+    - ./download_dashboards.sh:/download_dashboards.sh
+    - ./dashboards:/var/lib/grafana/dashboards
+  entrypoint: ["/bin/bash", "/download_dashboards.sh"]
+  networks:
+    - observability
+  depends_on:
+    - prometheus
+    - loki
+    - tempo
+
